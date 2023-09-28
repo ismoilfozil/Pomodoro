@@ -4,11 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
@@ -25,13 +23,21 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var navigationHandler:NavigationHandler
-    @OptIn(ExperimentalAnimationApi::class)
+
+    private val viewModel:ThemeViewModel by viewModels()
+
     @SuppressLint("FlowOperatorInvokedInComposition", "CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            PomodoroTheme {
-                Navigator( screen = MainScreen()){ navigator ->
+            val theme  = viewModel.status.collectAsState()
+
+            PomodoroTheme(
+                themeColorStatus = theme.value
+            ){
+                Navigator( screen = MainScreen(viewModel)){ navigator ->
                     navigationHandler.navStack
                         .onEach {
                             it.invoke(navigator)
@@ -40,21 +46,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PomodoroTheme {
-        Greeting("Android")
     }
 }

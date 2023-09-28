@@ -12,29 +12,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.androidx.AndroidScreen
 import cafe.adriel.voyager.hilt.getViewModel
 import uz.xteam.pomodoro.R
-import uz.xteam.pomodoro.ui.theme.Red
-import uz.xteam.pomodoro.ui.theme.Red50
 
 class SettingsScreen : AndroidScreen() {
     @Composable
@@ -50,7 +43,7 @@ class SettingsScreen : AndroidScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Red50)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Row(
                 modifier = Modifier
@@ -60,7 +53,9 @@ class SettingsScreen : AndroidScreen() {
             ) {
                 Text(
                     modifier = Modifier.weight(1f), text = "Settings", style = TextStyle(
-                        color = Red, fontSize = 24.sp, fontWeight = FontWeight(700)
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight(700)
                     )
                 )
 
@@ -70,58 +65,65 @@ class SettingsScreen : AndroidScreen() {
                     Icon(
                         modifier = Modifier.padding(8.dp),
                         painter = painterResource(id = R.drawable.ph_vector),
-                        contentDescription = "Close"
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            var darkMode by remember { mutableStateOf(false) }
-            var focusLength by remember { mutableIntStateOf(25) }
+            val darkMode = viewModel.darkMode.collectAsState()
+            val focusLength = viewModel.focusLength.collectAsState()
+            val untilLong = viewModel.untilLong.collectAsState()
+            val shBreakLength = viewModel.shBreakLength.collectAsState()
+            val lBreakLength = viewModel.lBreakLength.collectAsState()
+            val autoResume = viewModel.autoResume.collectAsState()
+            val sound = viewModel.sound.collectAsState()
+            val notification = viewModel.notifications.collectAsState()
 
-            SwitchComponent(text = "Dark mode", darkMode){ isChecked ->
-                darkMode = isChecked
+            SwitchComponent(text = "Dark mode", darkMode.value) { isChecked ->
+                viewModel.changeDarkMode(isChecked)
             }
 
 
-            InputComponent(text ="Focus length", value = focusLength.toString(),
+            InputComponent(text = "Focus length", value = focusLength.value.toString(),
                 onUpClick = {
-                    focusLength++
+                    viewModel.increaseFocusLength()
                 },
                 onDownClick = {
-                    focusLength--
+                    viewModel.decreaseFocusLength()
                 }
 
             )
-            InputComponent(text ="Pomodoros until long break", value ="25",
+            InputComponent(text = "Pomodoros until long break", value = untilLong.value.toString(),
                 onDownClick = {
-
+                    viewModel.decreaseUntilLong()
                 },
                 onUpClick = {
-
+                    viewModel.increaseUntilLong()
                 })
-            InputComponent(text ="Short break length", value = "25",
+            InputComponent(text = "Short break length", value = shBreakLength.value.toString(),
                 onUpClick = {
-                    
+                    viewModel.increaseShBreakLength()
                 },
                 onDownClick = {
-
+                    viewModel.decreaseShBreakLength()
                 })
-            InputComponent(text ="Long break length", value ="25",
+            InputComponent(text = "Long break length", value = lBreakLength.value.toString(),
                 onUpClick = {
-
+                    viewModel.increaseLBreakLength()
                 },
                 onDownClick = {
-
+                    viewModel.decreaseLBreakLength()
                 })
 
-            SwitchComponent(text = "Auto resume timer", false){
-
+            SwitchComponent(text = "Auto resume timer", autoResume.value) { isCheked ->
+                viewModel.changeAutoResume(isCheked)
             }
-            SwitchComponent(text = "Sound", false) {
-
+            SwitchComponent(text = "Sound", sound.value) {isCheked ->
+                viewModel.changeSound(isCheked)
             }
-            SwitchComponent(text = "Notifications", false){
-
+            SwitchComponent(text = "Notifications", notification.value) {isCheked ->
+                viewModel.changeNotifications(isCheked)
             }
 
         }
@@ -130,10 +132,10 @@ class SettingsScreen : AndroidScreen() {
 
     @Composable
     fun SwitchComponent(
-        text:String,
-        checked:Boolean,
+        text: String,
+        checked: Boolean,
         onCheckedChange: (Boolean) -> Unit
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -142,7 +144,9 @@ class SettingsScreen : AndroidScreen() {
         ) {
             Text(
                 modifier = Modifier.weight(1f), text = text, style = TextStyle(
-                    color = Red, fontSize = 16.sp, fontWeight = FontWeight(400)
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight(400)
                 )
             )
 
@@ -153,11 +157,11 @@ class SettingsScreen : AndroidScreen() {
 
     @Composable
     fun InputComponent(
-        text:String,
-        value:String,
-        onUpClick : () -> Unit,
-        onDownClick : () -> Unit,
-    ){
+        text: String,
+        value: String,
+        onUpClick: () -> Unit,
+        onDownClick: () -> Unit,
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -166,7 +170,9 @@ class SettingsScreen : AndroidScreen() {
         ) {
             Text(
                 modifier = Modifier.weight(1f), text = text, style = TextStyle(
-                    color = Red, fontSize = 16.sp, fontWeight = FontWeight(400)
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight(400)
                 )
             )
 
@@ -183,39 +189,45 @@ class SettingsScreen : AndroidScreen() {
     fun CarbonInput(
         modifier: Modifier = Modifier,
         text: String,
-        onUpClick : () -> Unit,
-        onDownClick : () -> Unit,
+        onUpClick: () -> Unit,
+        onDownClick: () -> Unit,
     ) {
         Row(
             modifier = modifier
                 .width(96.dp)
                 .height(40.dp)
                 .border(
-                    width = 1.dp, color = Color(0x26000000), shape = RoundedCornerShape(size = 8.dp)
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(size = 8.dp)
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.weight(1f),
                 text = text,
-                color = Red,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
             )
             Column {
                 IconButton(
                     modifier = Modifier.weight(1f),
-                    onClick = onUpClick){
+                    onClick = onUpClick
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.frame_15),
                         contentDescription = "Up",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(
                     modifier = Modifier.weight(1f),
-                    onClick = onDownClick){
+                    onClick = onDownClick
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.frame_16),
                         contentDescription = "Down",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

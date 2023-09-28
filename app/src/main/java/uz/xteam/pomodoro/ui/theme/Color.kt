@@ -26,3 +26,5 @@ val Blue50 = Color(0xFFF2F9FF)
 val Blue = Color(0xFF153047)
 val Blue15 = Color(0x264CACFF)
 val Blue62 = Color(0x9E4CACFF)
+
+val DarkBackground = Color(0xFF04090D)
